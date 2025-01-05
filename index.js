@@ -27,7 +27,11 @@ if (cluster.isPrimary) {
   app.use(express.urlencoded({ extended: true }));
   app.use(
     cors({
-      origin:["*","http://localhost:5173", "https://chat-app-nu-brown.vercel.app"]
+      origin: [
+        "*",
+        "http://localhost:5173",
+        "https://chat-app-nu-brown.vercel.app",
+      ],
     })
   );
   app.get("/", (req, res) => {
@@ -58,7 +62,11 @@ if (cluster.isPrimary) {
 
   const io = new Server(server, {
     cors: {
-      origin: ["*","http://localhost:5173", "https://chat-app-nu-brown.vercel.app"], // Replace with your client's URL
+      origin: [
+        "*",
+        "http://localhost:5173",
+        "https://chat-app-nu-brown.vercel.app",
+      ],
       methods: ["GET", "POST"],
     },
   });
@@ -66,31 +74,32 @@ if (cluster.isPrimary) {
   io.on("connection", (socket) => {
     console.log("Connected to socket.io", socket.id);
     socket.on("setup", (userData) => {
-      console.log("Setup user:", userData);
+      // console.log("Setup user:", userData);
       socket.join(userData.id);
       socket.emit("connected");
     });
 
     socket.on("join chat", (room) => {
       socket.join(room);
-      console.log("User Joined Room: " + room);
+      // console.log("User Joined Room: " + room);
     });
 
     socket.on("new message", (newMessageRecieved) => {
-      console.log("newMessageRecieved", newMessageRecieved);
+      // console.log("newMessageRecieved", newMessageRecieved);
       let chat = newMessageRecieved.chat;
-      socket.join(newMessageRecieved.chatId)
+      socket.join(newMessageRecieved.chatId);
       // io.in(newMessageRecieved.chatId).emit("message recieved", newMessageRecieved);
       socket.emit("message recieved", newMessageRecieved);
-      socket.broadcast.to(newMessageRecieved.chatId).emit("message recieved", newMessageRecieved)
-
+      socket.broadcast
+        .to(newMessageRecieved.chatId)
+        .emit("message recieved", newMessageRecieved);
     });
 
-    socket.on("typing",({chatId,name})=>{
-      console.log(chatId,name);
+    socket.on("typing", ({ chatId, name }) => {
+      // console.log(chatId,name);
       socket.join(chatId);
-      socket.broadcast.to(chatId).emit("typing",name);
-    })
+      socket.broadcast.to(chatId).emit("typing", name);
+    });
 
     socket.on("disconnect", () => {
       console.log("Disconnected", socket.id);
